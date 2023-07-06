@@ -1,5 +1,6 @@
 const mysql = require('mysql2/promise');
 const ULID = require("ulid");
+const SubscribersController = require('./subscribersController');
 
 const conMysql = async () => {
   return await mysql.createConnection({
@@ -33,7 +34,6 @@ module.exports = {
 
   create: async(req,res,next) => {
     //userCreateのためのデータ型を作成してcreateのqueryを叩く
-    console.log(req.body)
     user = {
       id: ULID.ulid(),
       name: JSON.stringify({
@@ -44,8 +44,18 @@ module.exports = {
       password: req.body.password,
       zipCode: req.body.zipCode
     };
+    const con = await conMysql();
     try {
-      const con = await conMysql();
+      //search subscriber who has the same email address
+      try{
+        if (user.subscribedAccount == undefined) {
+          const [result, fields] = await con.execute("SELECT * FROM subscribers WHERE email = (?)",[user.email]);
+          user.subscribedAccount = result
+        }
+      } catch (e) {
+        console.log(e.message);
+        throw e;
+      }
       const result = await con.query('INSERT INTO users SET ?',user);
       res.locals.redirect = "/users";
       res.locals.user = user;
