@@ -35,18 +35,7 @@ router.get("/", homeController.index);
 router.get("/courses", homeController.showCourses);
 
 router.get("/contact", subscribersController.getSubscriptionPage);
-router.post("/subscribe", 
-body('id').notEmpty().isString(), 
-(req,res,next) => {
-  const result = validationResult(req);
-  if (result.isEmpty()) {
-    next();
-  } else {
-    res.send({error: result.array()});
-    console.log(result);
-    throw new Error("error");
-  }
-},
+router.post("/subscribe",
 body('email').notEmpty().isString(),
 (req,res,next) => {
   const result = validationResult(req);

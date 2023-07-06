@@ -75,7 +75,12 @@ module.exports = {
   show: async(req,res,next) => {
     let userId = req.params.id;
     try {
-      //そのIDをもつuserを探す
+      const con = await conMysql()
+      const [user, field] = await con.execute("SELECT * FROM users WHERE id = ?",[userId])
+      const x = user[0].name
+      user[0].fullName = user[0].name.first +" " + user[0].name.last;
+      res.locals.user = user;
+      next()
     } catch(e) {
       console.log(`Error fetching user by ID: ${e.message}`);
       next(e)

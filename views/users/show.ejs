@@ -1,34 +1,34 @@
 <h1>User Data for
-  <%= user.fullName %>
+  <%= user[0].fullName %>
 </h1>
 <table class="table">
   <tr>
     <th>Name</th>
     <td>
-      <%= user.fullName %>
+      <%= user[0].fullName %>
     </td>
   </tr>
   <tr>
     <th>Email</th>
     <td>
-      <%= user.email %>
+      <%= user[0].email %>
     </td>
   </tr>
   <tr>
     <th>Zip Code</th>
     <td>
-      <%= user.zipCode %>
+      <%= user[0].zipCode %>
     </td>
   </tr>
   <tr>
     <th>Password</th>
     <td class="hidden-text">
-      <%= user.password %>
+      <%= user[0].password %>
     </td>
   </tr>
 </table>
 
-<% if (user.subscribedAccount) { %>
+<% if (user[0].subscribedAccount) { %>
 <h4 class="center"> This user has a
   <a href="<%=`/subscribers/${user.subscribedAccount}` %>">
     subscribed account</a>.

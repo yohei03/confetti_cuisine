@@ -1,4 +1,6 @@
 const mysql = require('mysql2/promise');
+const ULID = require("ulid");
+
 const conMysql = async () => {
   return await mysql.createConnection({
     host: 'localhost',
@@ -28,7 +30,7 @@ exports.getAllSubscribers = async (req,res) => {
 exports.findOne = async (req,res) => {
   const con = await conMysql();
   try {
-    const [result, fields] = await con.execute("SELECT * FROM subscribers WHERE email == ?",[req.id]);
+    const [result, fields] = await con.execute("SELECT * FROM subscribers WHERE email = ?",[req.id]);
     console.log(result);
     res.send(result);
   } catch (error) {
@@ -46,7 +48,7 @@ exports.saveSubscriber = async (req,res) => {
   const con = await conMysql();
   try {
     await con.query("INSERT INTO subscribers (id, name, email, zipCode) VALUES (?,?,?,?)", 
-    [req.body.id, req.body.name, req.body.email, req.body.zipCode]);
+    [ULID.ulid(), req.body.name, req.body.email, req.body.zipCode]);
     await res.render("thanks");
   } catch(error) {
     console.log(error);
