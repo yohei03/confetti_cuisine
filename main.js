@@ -4,8 +4,10 @@ const express = require("express"),
   app = express(),
   router = express.Router(),
   mysql =require('mysql2/promise'),
-  { body, validationResult } = require('express-validator'),
   methodOverride = require('method-override'),
+  expressSession = require('express-session'),
+  cookieParser = require('cookie-parser'),
+  connectFlash = require('connect-flash'),
   errorController = require("./controllers/errorController"),
   homeController = require("./controllers/homeController"),
   subscribersController = require("./controllers/subscribersController"),
@@ -30,10 +32,24 @@ router.use(homeController.logRequestPaths);
 router.use(methodOverride("_method", {
   methods: ["POST","GET"]
 }));
+router.use(cookieParser("secret_passcode"));
+router.use(expressSession({
+  secret: "secret_passcode",
+  cookie: {
+    maxAge: 4000000
+  },
+  resave: false,
+  saveUninitialized: false
+}));
+router.use(connectFlash());
+router.use((req,res,next) => {
+  res.locals.flashMessages = req.flash();
+  next();
+});
+
 
 router.get("/name", homeController.respondWithName);
 router.get("/items/:vegetable", homeController.sendReqParam);
-
 router.get("/", homeController.index);
 router.get("/courses", homeController.showCourses);
 
@@ -41,6 +57,8 @@ router.get("/courses", homeController.showCourses);
 //user
 router.get("/users", usersController.index, usersController.indexView);
 router.get("/users/new", usersController.new);
+router.get("/users/login", usersController.login);
+router.post("/users/login", usersController.authenticate,usersController.redirectView)
 router.post("/users/create", usersController.create, usersController.redirectView);
 router.get("/users/:id", usersController.show, usersController.showView);
 router.get("/users/:id/edit",usersController.edit);

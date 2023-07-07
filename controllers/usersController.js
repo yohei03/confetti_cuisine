@@ -45,12 +45,15 @@ module.exports = {
         console.log(e.message);
         throw e;
       }
-      const result = await mysqlMethod.create("users", user)
+      const result = await mysqlMethod.create("users", user);
+      req.flash("success", `${user.fullName}'s account created successfully!`);
       res.locals.redirect = "/users";
       res.locals.user = user;
       next()
     } catch (e) {
-      console.log(e)
+
+      console.log(`Error saving user: ${e.message}`);
+      req.flash("error", `Failed to create user account because: ${e.message}`);
       next(e)
     }
   },
@@ -95,7 +98,7 @@ module.exports = {
     try {
       const userId = req.params.id;
       userParams = {
-        id: ULID.ulid(),
+        id: userId,  ///////////
         name: JSON.stringify({
           first: req.body.first, 
           last: req.body.last
@@ -124,5 +127,28 @@ module.exports = {
       console.log(`Error deleting user by ID: ${e.message}`);
       next(e);
     }
-  } 
+  },
+
+  login: (req,res) => {
+    res.render('users/login');
+  },
+
+  authenticate: async (req,res,next) => {
+    try{
+      const user = await mysqlMethod.findOneByEmail("users", req.body.email);
+      if (user) {
+        req.locals.redirect = `/users/${user.id}`
+        req.flash("success", `${user[0].name.first}'s logged in successfully`);
+        req.locals.user = user;
+        next()
+      } else {
+        req.locals.flash("error","Your account password or email is incorrect."+"Please try again or contact your system administrator!");
+        res.locals.redirect = "/users/login";
+        next()
+      }
+    } catch(e) {
+      console.log(`Error logging in user: ${e.message}`);
+      next(e)
+    } 
+  }
 }
