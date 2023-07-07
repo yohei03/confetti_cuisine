@@ -1,16 +1,6 @@
-const mysql = require('mysql2/promise');
 const mysqlMethod = require('./mysql');
 const ULID = require("ulid");
-const SubscribersController = require('./subscribersController');
 
-const conMysql = async () => {
-  return await mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '0000',
-    database:'confetti_cuisine'
-  });
-}
 
 module.exports = {
   index: async(req,res,next) => {
@@ -44,7 +34,6 @@ module.exports = {
       password: req.body.password,
       zipCode: req.body.zipCode
     };
-    const con = await conMysql();
     try {
       //search subscriber who has the same email address
       try{
