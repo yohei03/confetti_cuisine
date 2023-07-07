@@ -4,16 +4,34 @@
     <tr>
       <th>Name</th>
       <th>Email</th>
-      <th>Zip code</th>
+      <th>Zip Code</th>
+      <th>Edit</th>
+      <th>Delete</th>
     </tr>
   </thead>
   <tbody>
     <% users.forEach(user => { %>
-      <tr>
-        <td><%= user.fullName %></td>
-        <td><%= user.email %></td>
-        <td><%= user.zipCode %></td>
-      </tr>
-    <%}); %>
+    <tr>
+      <td>
+        <a href="<%= `/users/${user.id}` %>">
+          <%= user.fullName %>
+        </a>
+      </td>
+      <td>
+        <%= user.email %>
+      </td>
+      <td>
+        <%= user.zipCode %>
+      </td>
+      <td>
+        <a href="<%=`/users/${user.id}/edit`%>">
+          Edit
+        </a>
+      </td>
+      <td>
+        <a href="<%=`/users/${user.id}/delete?_method=DELETE` %>" onclick="return confirm('Are you sure you want to delete this record?')">Delete</a>
+      </td>
+    </tr>
+    <% }); %>
   </tbody>
 </table>

@@ -1,4 +1,5 @@
 const mysql = require('mysql2/promise');
+const mysqlMethod = require('./mysql');
 const ULID = require("ulid");
 const SubscribersController = require('./subscribersController');
 
@@ -14,8 +15,7 @@ const conMysql = async () => {
 module.exports = {
   index: async(req,res,next) => {
     try {
-      const con = await conMysql();
-      const [rows, fields] = await con.query("SELECT * FROM Users");
+      const rows = await mysqlMethod.findAll("users");
       res.locals.users = rows;
       next();
     } catch (e) {
@@ -25,7 +25,7 @@ module.exports = {
   },
 
   indexView: async (req,res) => {
-    res.render("user/index");
+    res.render("users/index");
   },
 
   new: (req,res) =>{
@@ -49,14 +49,14 @@ module.exports = {
       //search subscriber who has the same email address
       try{
         if (user.subscribedAccount == undefined) {
-          const [result, fields] = await con.execute("SELECT * FROM subscribers WHERE email = (?)",[user.email]);
+          const result = await mysqlMethod.findOneByEmail("subscribers",user.email)
           user.subscribedAccount = result
         }
       } catch (e) {
         console.log(e.message);
         throw e;
       }
-      const result = await con.query('INSERT INTO users SET ?',user);
+      const result = await mysqlMethod.create("users", user)
       res.locals.redirect = "/users";
       res.locals.user = user;
       next()
@@ -75,10 +75,8 @@ module.exports = {
   show: async(req,res,next) => {
     let userId = req.params.id;
     try {
-      const con = await conMysql()
-      const [user, field] = await con.execute("SELECT * FROM users WHERE id = ?",[userId])
-      const x = user[0].name
-      user[0].fullName = user[0].name.first +" " + user[0].name.last;
+      const user = await mysqlMethod.findOneById("users",userId)[0]
+      user.fullName = user.name.first +" " + user.name.last;
       res.locals.user = user;
       next()
     } catch(e) {
@@ -89,7 +87,53 @@ module.exports = {
 
   showView: (req,res) => {
     res.render("users/show");
-  }
+  },
+
+  edit: async (req,res,next) => {
+    try{
+      let userId = req.params.id;
+      const user = await mysqlMethod.findOneById("users",userId);
+      await res.render("users/edit", {
+        user: user[0]
+      });
+    } catch (e) {
+      console.log(`Error fetching user by ID: ${e.message}`);
+      next(e);
+    }
+  },
+
+  update: async(req,res,next) => {
+    try {
+      const userId = req.params.id;
+      userParams = {
+        id: ULID.ulid(),
+        name: JSON.stringify({
+          first: req.body.first, 
+          last: req.body.last
+        }),
+        email: req.body.email,
+        password: req.body.password,
+        zipCode: req.body.zipCode
+      };
+      const user = await mysqlMethod.findByIdAndUpdate("users",id,userParams)
+      res.locals.redirect =`/users/${userId}`;
+      res.locals.user = user;
+      next();
+    } catch (e){
+      console.log(`Error updating user by ID: ${e.message}`);
+      next(e);
+    } 
+  },
+
+  delete: async(req,res,next) => {
+    try {
+      let userId = req.params.id;
+      const result = await mysqlMethod.findByIdAndRemove("users",userId);
+      res.locals.redirect = "/users";
+      next();
+    } catch (e) {
+      console.log(`Error deleting user by ID: ${e.message}`);
+      next(e);
+    }
+  } 
 }
-
-

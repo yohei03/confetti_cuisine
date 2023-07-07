@@ -4,6 +4,7 @@ const express = require("express"),
   router = express.Router(),
   mysql =require('mysql2/promise'),
   { body, validationResult } = require('express-validator'),
+  methodOverride = require('method-override'),
   errorController = require("./controllers/errorController"),
   homeController = require("./controllers/homeController"),
   subscribersController = require("./controllers/subscribersController"),
@@ -25,6 +26,9 @@ router.use(
 
 router.use(express.json());
 router.use(homeController.logRequestPaths);
+router.use(methodOverride("_method", {
+  methods: ["POST","GET"]
+}));
 
 router.get("/name", homeController.respondWithName);
 router.get("/items/:vegetable", homeController.sendReqParam);
@@ -47,11 +51,15 @@ body('email').notEmpty().isString(),
     throw new Error("error");
   }
   },
-subscribersController.saveSubscriber);
-
+  subscribersController.saveSubscriber
+);
+router.get("/users", usersController.index, usersController.indexView);
 router.get("/users/new", usersController.new);
 router.post("/users/create", usersController.create, usersController.redirectView);
 router.get("/users/:id", usersController.show, usersController.showView);
+router.get("/users/:id/edit",usersController.edit);
+router.put("/users/:id/update", usersController.update,usersController.redirectView);
+router.delete("/users/:id/delete",usersController.delete, usersController.redirectView)
 
 router.use(errorController.logErrors);
 router.use(errorController.respondNoResourceFound);
