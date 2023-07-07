@@ -1,3 +1,4 @@
+const coursesController = require("./controllers/coursesController");
 
 const express = require("express"),
   app = express(),
@@ -48,9 +49,24 @@ router.delete("/users/:id/delete",usersController.delete, usersController.redire
 
 
 //subscribers
-router.get("/subscribers/new", subscribersController.getSubscriptionPage);
+router.get("/subscribers", subscribersController.index, subscribersController.indexView);
+router.get("/subscribers/new", subscribersController.new);
+router.post("/subscribers/create", subscribersController.create, subscribersController.redirectView);
+router.get("/subscribers/:id", subscribersController.show, subscribersController.showView);
+router.get("/subscribers/:id/edit",subscribersController.edit);
+router.put("/subscribers/:id/update", subscribersController.update,subscribersController.redirectView);
+router.delete("/subscribers/:id/delete",subscribersController.delete, subscribersController.redirectView)
+
 
 //courses
+router.get("/courses", coursesController.index, coursesController.indexView);
+router.get("/courses/new", coursesController.new);
+router.post("/courses/create", coursesController.create, coursesController.redirectView);
+router.get("/courses/:id", coursesController.show, coursesController.showView);
+router.get("/courses/:id/edit",coursesController.edit);
+router.put("/courses/:id/update", coursesController.update,coursesController.redirectView);
+router.delete("/courses/:id/delete",coursesController.delete, coursesController.redirectView)
+
 
 router.use(errorController.logErrors);
 router.use(errorController.respondNoResourceFound);

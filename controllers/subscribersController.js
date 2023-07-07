@@ -23,7 +23,7 @@ module.exports = {
   },
 
   create: async(req,res,next) => {
-    //userCreateのためのデータ型を作成してcreateのqueryを叩く
+    //Createのためのデータ型を作成してcreateのqueryを叩く
     try {
       subscriber = {
         id: ULID.ulid(),
@@ -79,15 +79,15 @@ module.exports = {
   update: async(req,res,next) => {
     try {
       const subscriberId = req.params.id;
-      userParams = {
-//        id: ULID.ulid(),
+      subscriberParams = {
+        id: subscriberId,
         name: req.body.name,
         email: req.body.email,
         zipCode: req.body.zipCode
       };
-      const user = await mysqlMethod.findByIdAndUpdate("subscribers",id,userParams)
+      const subscriber = await mysqlMethod.findByIdAndUpdate("subscribers",id,subscriberParams)
       res.locals.redirect =`/subscribers/${subscriberId}`;
-      res.locals.user = user;
+      res.locals.subscriber = subscriber;
       next();
     } catch (e){
       console.log(`Error updating subscribers by ID: ${e.message}`);
