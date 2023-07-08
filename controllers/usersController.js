@@ -159,5 +159,33 @@ module.exports = {
       console.log(`Error logging in user: ${e.message}`);
       next(e)
     } 
+  },
+
+  validate: async (req,res,next) => {
+    try{
+      req.sanitizeBody("email").normalizeEmail({
+        all_lowercase: true
+      }).trim();
+      req.check("email", "Email is invalid").isEmail();
+      req.check("zipCode", "Zip code is invalid").notEmpty().isInt().isLength({
+        min: 5,
+        max:5
+      }).equals(req.body.zipCode);
+      req.check("password", "Password cannot be empty").notEmpty();
+  
+      const error  = await req.getValidationResult()
+      if (!error.isEmpty()) {
+        let messages = error.array().map(e => {e.msg});
+        req.skip = true;
+        req.flash("error", message.join(" and "));
+        res.locals.redirect = "/users/new";
+        next();
+      } else {
+        next();
+      }
+    } catch (e) {
+      throw e
+    }
+
   }
 }

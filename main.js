@@ -1,3 +1,4 @@
+const { ExpressValidator, check } = require("express-validator");
 const coursesController = require("./controllers/coursesController");
 
 const express = require("express"),
@@ -46,6 +47,7 @@ router.use((req,res,next) => {
   res.locals.flashMessages = req.flash();
   next();
 });
+router.use(ExpressValidator())
 
 
 router.get("/name", homeController.respondWithName);
@@ -59,7 +61,7 @@ router.get("/users", usersController.index, usersController.indexView);
 router.get("/users/new", usersController.new);
 router.get("/users/login", usersController.login);
 router.post("/users/login", usersController.authenticate,usersController.redirectView)
-router.post("/users/create", usersController.create, usersController.redirectView);
+router.post("/users/create", usersController.validate, usersController.create, usersController.redirectView);
 router.get("/users/:id", usersController.show, usersController.showView);
 router.get("/users/:id/edit",usersController.edit);
 router.put("/users/:id/update", usersController.update,usersController.redirectView);
