@@ -1,5 +1,5 @@
 const ULID = require("ulid");
-const mysqlMethod = require("./mysql");
+const mysqlMethod = require("../lib/database/mysql");
 
 
 module.exports = {

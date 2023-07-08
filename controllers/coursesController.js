@@ -1,5 +1,5 @@
 const ULID = require("ulid");
-const mysqlMethod = require("./mysql");
+const mysqlMethod = require("../lib/database/mysql");
 
 
 module.exports = {
@@ -105,7 +105,7 @@ module.exports = {
       console.log(`Error deleting course by ID: ${e.message}`);
       next(e);
     }
-  } 
+  }
 }
 
 

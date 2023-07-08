@@ -1,5 +1,6 @@
-const mysqlMethod = require('./mysql');
+const mysqlMethod = require('../lib/database/mysql');
 const ULID = require("ulid");
+const bcrypt = require("bcrypt");
 
 
 module.exports = {
@@ -44,6 +45,13 @@ module.exports = {
       } catch (e) {
         console.log(e.message);
         throw e;
+      }
+      try {
+        const hash = await bcrypt.hash(user.password, 10);
+        user.password = hash
+      } catch (e) {
+        console.log(e.message);
+        throw e
       }
       const result = await mysqlMethod.create("users", user);
       req.flash("success", `${user.fullName}'s account created successfully!`);
@@ -135,10 +143,11 @@ module.exports = {
 
   authenticate: async (req,res,next) => {
     try{
-      const user = await mysqlMethod.findOneByEmail("users", req.body.email);
-      if (user) {
+      const user = (await mysqlMethod.findOneByEmail("users", req.body.email))[0];
+
+      if (bcrypt.compareSync(req.body.password, user.password)) {
         req.locals.redirect = `/users/${user.id}`
-        req.flash("success", `${user[0].name.first}'s logged in successfully`);
+        req.flash("success", `${user.name.first}'s logged in successfully`);
         req.locals.user = user;
         next()
       } else {
