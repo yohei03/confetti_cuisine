@@ -18,8 +18,6 @@ const express = require("express"),
 //connect to mysql
 
 
-require('./lib/security/accesscontroller')(passport);
-
 app.set("port", process.env.PORT || 3000);
 app.set("view engine", "ejs");
 
@@ -31,7 +29,6 @@ router.use(
     extended: false
   })
 );
-
 router.use(express.json());
 router.use(homeController.logRequestPaths);
 router.use(methodOverride("_method", {
@@ -47,14 +44,18 @@ router.use(expressSession({
   saveUninitialized: false
 }));
 router.use(connectFlash());
-router.use((req,res,next) => {
-  res.locals.flashMessages = req.flash();
-  next();
-});
-router.use(ExpressValidator());
+
+//router.use(ExpressValidator);
+require('./lib/security/accesscontroller')(passport);
 router.use(passport.initialize());
 router.use(passport.session());
 
+router.use((req,res,next) => {
+  res.locals.loggedIn = req.isAuthenticated();
+  res.locals.currentUser = req.user;
+  res.locals.flashMessages = req.flash();
+  next();
+});
 
 router.get("/name", homeController.respondWithName);
 router.get("/items/:vegetable", homeController.sendReqParam);
@@ -66,7 +67,16 @@ router.get("/courses", homeController.showCourses);
 router.get("/users", usersController.index, usersController.indexView);
 router.get("/users/new", usersController.new);
 router.get("/users/login", usersController.login);
-router.post("/users/login", usersController.authenticate,usersController.redirectView)
+router.post("/users/login", async (req,res,next) => {
+  passport.authenticate("local", {
+  failureRedirect: "users/login",
+  failureFlash: "Failed to login.",
+  successRedirect:"/",
+  successFlash: "Logged in!"
+ });
+  next();
+},
+usersController.redirectView)
 router.post("/users/create", usersController.validate, usersController.create, usersController.redirectView);
 router.get("/users/:id", usersController.show, usersController.showView);
 router.get("/users/:id/edit",usersController.edit);

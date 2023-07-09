@@ -141,25 +141,6 @@ module.exports = {
     res.render('users/login');
   },
 
-  authenticate: async (req,res,next) => {
-    try{
-      const user = (await mysqlMethod.findOneByEmail("users", req.body.email))[0];
-
-      if (bcrypt.compareSync(req.body.password, user.password)) {
-        req.locals.redirect = `/users/${user.id}`
-        req.flash("success", `${user.name.first}'s logged in successfully`);
-        req.locals.user = user;
-        next()
-      } else {
-        req.locals.flash("error","Your account password or email is incorrect."+"Please try again or contact your system administrator!");
-        res.locals.redirect = "/users/login";
-        next()
-      }
-    } catch(e) {
-      console.log(`Error logging in user: ${e.message}`);
-      next(e)
-    } 
-  },
 
   validate: async (req,res,next) => {
     try{
@@ -189,5 +170,5 @@ module.exports = {
 
   },
 
-  
+
 }
