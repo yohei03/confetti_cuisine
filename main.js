@@ -9,12 +9,16 @@ const express = require("express"),
   expressSession = require('express-session'),
   cookieParser = require('cookie-parser'),
   connectFlash = require('connect-flash'),
+  passport = require("passport");
   errorController = require("./controllers/errorController"),
   homeController = require("./controllers/homeController"),
   subscribersController = require("./controllers/subscribersController"),
   usersController = require("./controllers/usersController"),
   layouts = require("express-ejs-layouts")
 //connect to mysql
+
+
+require('./lib/security/accesscontroller')(passport);
 
 app.set("port", process.env.PORT || 3000);
 app.set("view engine", "ejs");
@@ -47,7 +51,9 @@ router.use((req,res,next) => {
   res.locals.flashMessages = req.flash();
   next();
 });
-router.use(ExpressValidator())
+router.use(ExpressValidator());
+router.use(passport.initialize());
+router.use(passport.session());
 
 
 router.get("/name", homeController.respondWithName);
