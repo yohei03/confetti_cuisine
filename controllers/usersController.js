@@ -1,6 +1,7 @@
 const mysqlMethod = require('../lib/database/mysql');
 const ULID = require("ulid");
 const bcrypt = require("bcrypt");
+const { validationResult } = require('express-validator');
 
 
 module.exports = {
@@ -27,7 +28,8 @@ module.exports = {
     //userCreateのためのデータ型を作成してcreateのqueryを叩く
     user = {
       id: ULID.ulid(),
-      name: JSON.stringify({
+      name: JSON.stringify
+      ({
         first: req.body.first, 
         last: req.body.last
       }),
@@ -37,15 +39,15 @@ module.exports = {
     };
     try {
       //search subscriber who has the same email address
-      try{
-        if (user.subscribedAccount == undefined) {
-          const result = await mysqlMethod.findOneByEmail("subscribers",user.email)
-          user.subscribedAccount = result
-        }
-      } catch (e) {
-        console.log(e.message);
-        throw e;
-      }
+//       try{
+//         if (user.subscribedAccount == undefined) {
+//           const result = await mysqlMethod.findOneByEmail("subscribers",user.email)
+//           user.subscribedAccount = result
+//         }
+//       } catch (e) {
+//         console.log(e.message);
+//         throw e;
+//       }
       try {
         const hash = await bcrypt.hash(user.password, 10);
         user.password = hash
@@ -53,6 +55,7 @@ module.exports = {
         console.log(e.message);
         throw e
       }
+      console.log(user)
       const result = await mysqlMethod.create("users", user);
       req.flash("success", `${user.fullName}'s account created successfully!`);
       res.locals.redirect = "/users";
@@ -115,7 +118,7 @@ module.exports = {
         password: req.body.password,
         zipCode: req.body.zipCode
       };
-      const user = await mysqlMethod.findByIdAndUpdate("users",id,userParams)
+      const user = await mysqlMethod.findByIdAndUpdate("users",userId,userParams)
       res.locals.redirect =`/users/${userId}`;
       res.locals.user = user;
       next();
@@ -141,34 +144,23 @@ module.exports = {
     res.render('users/login');
   },
 
-
-  validate: async (req,res,next) => {
-    try{
-      req.sanitizeBody("email").normalizeEmail({
-        all_lowercase: true
-      }).trim();
-      req.check("email", "Email is invalid").isEmail();
-      req.check("zipCode", "Zip code is invalid").notEmpty().isInt().isLength({
-        min: 5,
-        max:5
-      }).equals(req.body.zipCode);
-      req.check("password", "Password cannot be empty").notEmpty();
-  
-      const error  = await req.getValidationResult()
-      if (!error.isEmpty()) {
+  validate: async function (req,res,next) {
+    try {
+      const error = validationResult(req)
+      console.log("validating")
+      if(!error.isEmpty()) {
         let messages = error.array().map(e => {e.msg});
         req.skip = true;
-        req.flash("error", message.join(" and "));
+        req.flash("error", messages.join(" and "))
         res.locals.redirect = "/users/new";
-        next();
-      } else {
-        next();
-      }
-    } catch (e) {
+      } 
+    } catch(e) {
+      console.log(e.message)
       throw e
+    } finally {
+      next();
     }
-
-  },
-
-
+  }
 }
+
+

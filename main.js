@@ -1,15 +1,15 @@
-const { ExpressValidator, check } = require("express-validator");
+
 const coursesController = require("./controllers/coursesController");
 
 const express = require("express"),
   app = express(),
   router = express.Router(),
-  mysql =require('mysql2/promise'),
   methodOverride = require('method-override'),
   expressSession = require('express-session'),
   cookieParser = require('cookie-parser'),
   connectFlash = require('connect-flash'),
-  passport = require("passport");
+  {check} = require('express-validator');
+  passport = require("passport"),
   errorController = require("./controllers/errorController"),
   homeController = require("./controllers/homeController"),
   subscribersController = require("./controllers/subscribersController"),
@@ -45,7 +45,6 @@ router.use(expressSession({
 }));
 router.use(connectFlash());
 
-//router.use(ExpressValidator);
 require('./lib/security/accesscontroller')(passport);
 router.use(passport.initialize());
 router.use(passport.session());
@@ -73,12 +72,18 @@ router.post("/users/login", async (req,res,next) => {
   failureFlash: "Failed to login.",
   successRedirect:"/",
   successFlash: "Logged in!"
- });
-  next();
+ })(req,res,next);
 },
 usersController.redirectView)
-router.post("/users/create", usersController.validate, usersController.create, usersController.redirectView);
-router.get("/users/:id", usersController.show, usersController.showView);
+router.post("/users/create", [
+  check('email').normalizeEmail().trim(),
+  check("zipCode").notEmpty().isInt().isLength({
+    min: 5,
+    max:5
+  }),
+  check("password", "Password cannot be empty").notEmpty()
+],usersController.validate, usersController.create, usersController.redirectView);
+//router.get("/users/:id", usersController.show, usersController.showView);
 router.get("/users/:id/edit",usersController.edit);
 router.put("/users/:id/update", usersController.update,usersController.redirectView);
 router.delete("/users/:id/delete",usersController.delete, usersController.redirectView)
