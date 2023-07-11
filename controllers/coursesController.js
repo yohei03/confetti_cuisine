@@ -5,8 +5,8 @@ const mysqlMethod = require("../lib/database/mysql");
 module.exports = {
   index: async (req,res,next) => {
     try {
-      const result = await mysqlMethod.findAll();
-      req.locals.courses = result;
+      const result = await mysqlMethod.findAll("courses");
+      res.locals.courses = result;
       next();
     } catch (e) {
       console.log(`Error fetching courses: ${e.message}`)
@@ -27,9 +27,10 @@ module.exports = {
     try {
       course = {
         id: ULID.ulid(),
-        name: req.body.name,
-        email: req.body.email,
-        zipCode: req.body.zipCode
+        title: req.body.title,
+        description: req.body.description,
+        maxStudents: req.body.maxStudents,
+        cost: req.body.cost
       };
       const result = await mysqlMethod.create("courses", course)
       res.locals.redirect = "/courses";
@@ -50,7 +51,7 @@ module.exports = {
   show: async(req,res,next) => {
     let courseId = req.params.id;
     try {
-      const course = await mysqlMethod.findOneById("courses",courseId)[0]
+      const course = (await mysqlMethod.findOneById("courses",courseId))[0]
       res.locals.course = course;
       next()
     } catch(e) {
@@ -81,9 +82,10 @@ module.exports = {
       const courseId = req.params.id;
       courseParams = {
         id: courseId,
-        name: req.body.name,
-        email: req.body.email,
-        zipCode: req.body.zipCode
+        title: req.body.title,
+        description: req.body.description,
+        maxStudents: req.body.maxStudents,
+        cost: req.body.cost
       };
       const course = await mysqlMethod.findByIdAndUpdate("courses",id,courseParams)
       res.locals.redirect =`/courses/${courseId}`;

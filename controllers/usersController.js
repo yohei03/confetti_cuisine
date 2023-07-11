@@ -78,7 +78,7 @@ module.exports = {
   show: async(req,res,next) => {
     let userId = req.params.id;
     try {
-      const user = await mysqlMethod.findOneById("users",userId)[0]
+      const user = (await mysqlMethod.findOneById("users",userId))[0]
       user.fullName = user.name.first +" " + user.name.last;
       res.locals.user = user;
       next()
@@ -142,6 +142,15 @@ module.exports = {
 
   login: (req,res) => {
     res.render('users/login');
+  },
+
+  logout: (req,res,next) => {
+    req.logout(function (err) {
+      if (err) {next(err)}
+    });
+    req.flash("success", "You have been logged out!");
+    res.locals.redirect = "/";
+    next();
   },
 
   validate: async function (req,res,next) {

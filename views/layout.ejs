@@ -32,8 +32,8 @@
 		<div class="login">
 			<% if (loggedIn) { %>
 			<p>Logged in as
-				<a href="<%=`/users/${currentUser._id}`%>">
-					<%= currentUser.fullName %></a>
+				<a href="<%=`/users/${currentUser.id}`%>">
+					<%= currentUser.name.first %></a>
 				<span class="log-out">
 					<a href="/users/logout">Log out</a>
 				</span>

@@ -1,5 +1,3 @@
-
-
 const express = require("express"),
   app = express(),
   router = express.Router(),
@@ -21,19 +19,20 @@ const express = require("express"),
 app.set("port", process.env.PORT || 3000);
 app.set("view engine", "ejs");
 
+router.use(methodOverride("_method", {
+  methods: ["POST","GET"]
+}));
+
 app.use("/", router);
-router.use(express.static("public"));
 router.use(layouts);
+router.use(express.static("public"));
 router.use(
   express.urlencoded({
     extended: false
   })
 );
 router.use(express.json());
-router.use(homeController.logRequestPaths);
-router.use(methodOverride("_method", {
-  methods: ["POST","GET"]
-}));
+
 router.use(cookieParser("secret_passcode"));
 router.use(expressSession({
   secret: "secret_passcode",
@@ -53,13 +52,11 @@ router.use((req,res,next) => {
   res.locals.loggedIn = req.isAuthenticated();
   res.locals.currentUser = req.user;
   res.locals.flashMessages = req.flash();
-  next();
+next();
 });
 
-router.get("/name", homeController.respondWithName);
-router.get("/items/:vegetable", homeController.sendReqParam);
+
 router.get("/", homeController.index);
-router.get("/courses", homeController.showCourses);
 
 
 //user
@@ -83,10 +80,12 @@ router.post("/users/create", [
   }),
   check("password", "Password cannot be empty").notEmpty()
 ],usersController.validate, usersController.create, usersController.redirectView);
-//router.get("/users/:id", usersController.show, usersController.showView);
+router.get("/users/logout",usersController.logout, usersController.redirectView);
+router.get("/users/:id", usersController.show, usersController.showView);
 router.get("/users/:id/edit",usersController.edit);
 router.put("/users/:id/update", usersController.update,usersController.redirectView);
-router.delete("/users/:id/delete",usersController.delete, usersController.redirectView)
+router.delete("/users/:id/delete",usersController.delete, usersController.redirectView);
+
 
 
 //subscribers
