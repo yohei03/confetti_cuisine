@@ -1,5 +1,4 @@
 
-const coursesController = require("./controllers/coursesController");
 
 const express = require("express"),
   app = express(),
@@ -13,6 +12,7 @@ const express = require("express"),
   errorController = require("./controllers/errorController"),
   homeController = require("./controllers/homeController"),
   subscribersController = require("./controllers/subscribersController"),
+  coursesController = require("./controllers/coursesController"),
   usersController = require("./controllers/usersController"),
   layouts = require("express-ejs-layouts")
 //connect to mysql
